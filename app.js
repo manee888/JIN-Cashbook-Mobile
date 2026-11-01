@@ -405,7 +405,7 @@ function drawReportPage(canvas, list, pageIndex, pageCount, inc, out, net){
   ctx.fillStyle='#eaf1f8';ctx.fillRect(M,y,W-2*M,52);ctx.fillStyle='#29425d';ctx.font='bold 18px Arial,"Noto Sans Thai",sans-serif';heads.forEach((h,i)=>ctx.fillText(h,cols[i]+8,y+33));y+=52;
   const rowH=66; const usableBottom=H-90;
   const rows=list.slice(pageIndex*20,(pageIndex+1)*20);
-  rows.forEach((x,ri)=>{ctx.strokeStyle='#cbd7e5';ctx.strokeRect(M,y,W-2*M,rowH);ctx.fillStyle=ri%2?'#fff':'#f8fbfe';ctx.fillRect(M,y,W-2*M,rowH);ctx.strokeStyle='#cbd7e5';[cols[1],cols[2],cols[3],cols[4]].forEach(col=>{ctx.beginPath();ctx.moveTo(col,y);ctx.lineTo(col,y+rowH);ctx.stroke();});ctx.fillStyle='#182536';ctx.font='16px Arial,"Noto Sans Thai",sans-serif';ctx.fillText(thaiDate(x.date),cols[0]+8,y+25);ctx.fillText(x.type==='income'?'รายรับ':'รายจ่าย',cols[1]+8,y+25);ctx.fillText(String(x.description||'').slice(0,32),cols[2]+8,y+25);ctx.fillText(String(x.note||'').slice(0,20),cols[3]+8,y+25);ctx.textAlign='right';ctx.fillStyle=x.type==='income'?'#0a9f36':'#e91d43';ctx.font='bold 17px Arial,"Noto Sans Thai",sans-serif';ctx.fillText(`${x.type==='income'?'+':'−'}฿${money(x.amount)}`,W-M-10,y+25);ctx.textAlign='left';y+=rowH;});
+  rows.forEach((x,ri)=>{ctx.strokeStyle='#cbd7e5';ctx.strokeRect(M,y,W-2*M,rowH);ctx.fillStyle=ri%2?'#fff':'#f8fbfe';ctx.fillRect(M,y,W-2*M,rowH);ctx.strokeStyle='#cbd7e5';[cols[1],cols[2],cols[3],cols[4]].forEach(xx=>ctx.beginPath(),ctx.moveTo(xx,y),ctx.lineTo(xx,y+rowH),ctx.stroke());ctx.fillStyle='#182536';ctx.font='16px Arial,"Noto Sans Thai",sans-serif';ctx.fillText(thaiDate(x.date),cols[0]+8,y+25);ctx.fillText(x.type==='income'?'รายรับ':'รายจ่าย',cols[1]+8,y+25);ctx.fillText(String(x.description||'').slice(0,32),cols[2]+8,y+25);ctx.fillText(String(x.note||'').slice(0,20),cols[3]+8,y+25);ctx.textAlign='right';ctx.fillStyle=x.type==='income'?'#0a9f36':'#e91d43';ctx.font='bold 17px Arial,"Noto Sans Thai",sans-serif';ctx.fillText(`${x.type==='income'?'+':'−'}฿${money(x.amount)}`,W-M-10,y+25);ctx.textAlign='left';y+=rowH;});
   if(!rows.length){ctx.fillStyle='#7b8998';ctx.font='20px Arial,"Noto Sans Thai",sans-serif';ctx.textAlign='center';ctx.fillText('ไม่มีรายการในช่วงที่เลือก',W/2,y+45);ctx.textAlign='left';}
   ctx.fillStyle='#8996a5';ctx.font='15px Arial,"Noto Sans Thai",sans-serif';ctx.textAlign='center';ctx.fillText(`JIN Cashbook Mobile · หน้า ${pageIndex+1}/${pageCount}`,W/2,H-35);ctx.textAlign='left';
 }
@@ -414,79 +414,39 @@ async function makeReportPdf(){
   for(let i=0;i<pageCount;i++){const c=document.createElement('canvas');drawReportPage(c,list,i,pageCount,inc,out,net);pages.push(c);}
   return await canvasPagesToPdf(pages);
 }
-function isStandalonePWA(){
-  return window.matchMedia && window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-}
-
-function openPdfInBrowser(file){
-  const url = URL.createObjectURL(file);
-  // In iOS Home Screen/PWA mode, opening the Blob in a new browser context
-  // is much more reliable than navigator.share({files}) or <a download>.
-  const w = window.open(url, '_blank');
-  if (!w) {
-    const a = document.createElement('a');
-    a.href = url;
-    a.target = '_blank';
-    a.rel = 'noopener';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-  }
-  setTimeout(() => URL.revokeObjectURL(url), 60000);
-  return true;
-}
-
 async function shareReport(){
   try{
     const file=new File([await makeReportPdf()],`JIN_Cashbook_${today()}.pdf`,{type:'application/pdf'});
-    // Safari browser: use the native file share when supported.
-    if(!isStandalonePWA() && navigator.share){
-      try{
-        if(!navigator.canShare || navigator.canShare({files:[file]})){
-          await navigator.share({title:'JIN Cashbook - รายงาน PDF',files:[file]});
-          return;
-        }
-      }catch(e){
-        if(e?.name==='AbortError') return;
-      }
-    }
-    // Home Screen/PWA or unsupported file-share: open the PDF in the browser.
-    // The iOS PDF viewer then provides its own Share button for LINE/Files/etc.
-    openPdfInBrowser(file);
-  }catch(e){
-    if(e?.name==='AbortError')return;
-    console.error('shareReport',e);
-    alert('สร้าง/แชร์ PDF ไม่สำเร็จ: '+(e?.message||e));
-  }
+    if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){await navigator.share({title:'JIN Cashbook - รายงาน PDF',files:[file]});return;}
+    download(file,file.name);alert('สร้างไฟล์ PDF เรียบร้อยแล้ว สามารถนำไฟล์ไปส่ง LINE หรือเก็บไว้ในเครื่องได้');
+  }catch(e){if(e?.name==='AbortError')return;alert('สร้าง/แชร์ PDF ไม่สำเร็จ: '+(e?.message||e));}
 }
-
 async function saveReportPdf(){
+  // Use the same proven Web Share file flow as the Share button.
+  // This is more reliable on mobile browsers than window.print() or a download-only anchor.
   try{
-    const file = new File([await makeReportPdf()], `JIN_Cashbook_${today()}.pdf`, {type:'application/pdf'});
-
-    // Browser mode: native file share is the cleanest route.
-    if(!isStandalonePWA() && navigator.share){
-      try{
-        if(!navigator.canShare || navigator.canShare({files:[file]})){
-          await navigator.share({
-            title:'JIN Cashbook - PDF รายงาน',
-            files:[file]
-          });
-          return;
-        }
-      }catch(e){
-        if(e?.name==='AbortError') return;
+    const pdfBlob = await makeReportPdf();
+    const file = new File([pdfBlob], `JIN_Cashbook_${today()}.pdf`, {type:'application/pdf'});
+    if (navigator.share) {
+      if (!navigator.canShare || navigator.canShare({files:[file]})) {
+        await navigator.share({
+          title:'JIN Cashbook - PDF รายงาน',
+          text:'เลือก LINE, Files, Google Drive หรือแอปที่ต้องการ เพื่อส่งหรือเก็บไฟล์ PDF',
+          files:[file]
+        });
+        return;
       }
     }
-
-    // iOS Home Screen/PWA cannot reliably download/share Blob files directly.
-    // Open the generated PDF in the browser/PDF viewer instead. From there the
-    // user can tap Share and choose LINE, Files, Drive, etc.
-    openPdfInBrowser(file);
+    const url=URL.createObjectURL(file);
+    const a=document.createElement('a');
+    a.href=url; a.download=file.name; a.rel='noopener';
+    document.body.appendChild(a); a.click();
+    setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},3000);
+    alert('สร้างไฟล์ PDF แล้ว: '+file.name+'\nหากต้องการส่ง LINE ให้เปิดไฟล์จากโฟลเดอร์ดาวน์โหลดแล้วกดแชร์');
   }catch(e){
     if(e?.name==='AbortError') return;
     console.error('saveReportPdf',e);
-    alert('สร้าง/เปิด PDF ไม่สำเร็จ\n'+(e?.message||e));
+    alert('สร้าง/บันทึก PDF ไม่สำเร็จ\n'+(e?.message||e));
   }
 }
 
@@ -532,7 +492,7 @@ function init() {
   }).catch(() => render());
 
   if ("serviceWorker" in navigator && window.isSecureContext) {
-    navigator.serviceWorker.register("sw.js?v=fix7").catch(() => {});
+    navigator.serviceWorker.register("sw.js").catch(() => {});
   }
 }
 
