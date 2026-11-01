@@ -1,0 +1,3 @@
+JIN Cashbook Mobile V2.4 – Fixed Offline
+UI Master preserved
+Fix: JavaScript initialization crash / IndexedDB + localStorage fallback / Service Worker v24
