@@ -344,27 +344,13 @@ function restoreFile(ev) {
   r.readAsText(f);
 }
 
-
-function escapeHtml(value) {
-  return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
-}
-function buildPrintReport() {
-  const list = selectedEntries();
-  const inc = list.filter(x => x.type === 'income').reduce((s,x) => s + Number(x.amount || 0), 0);
-  const out = list.filter(x => x.type === 'expense').reduce((s,x) => s + Number(x.amount || 0), 0);
-  const net = inc - out;
-  const rows = list.map(x => `
-    <tr><td>${thaiDate(x.date)}</td><td>${x.type === 'income' ? 'รายรับ' : 'รายจ่าย'}</td><td>${escapeHtml(x.description)}</td><td>${escapeHtml(x.note || '')}</td><td class="num ${x.type === 'income' ? 'green' : 'red'}">${x.type === 'income' ? '+' : '−'}฿${money(x.amount)}</td></tr>`).join('');
-  return `<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>JIN Cashbook Report</title>
-<style>*{box-sizing:border-box}body{font-family:Arial,'Noto Sans Thai',Tahoma,sans-serif;color:#172033;margin:0;background:#fff}.report{padding:10mm}.brand{display:flex;justify-content:space-between;border-bottom:3px solid #1769e0;padding-bottom:10px;margin-bottom:12px}.brand h1{margin:0;color:#1769e0;font-size:23px}.brand p{margin:3px 0 0;font-size:11px;color:#607089}.date{font-size:10px;color:#607089;text-align:right}.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}.box{border:1px solid #cfd9e5;border-radius:8px;padding:9px;text-align:center}.box b{display:block;font-size:10px;color:#62738a}.box strong{display:block;font-size:16px;margin-top:4px}.green{color:#0a9f35}.red{color:#e51d43}.blue{color:#1769e0}table{width:100%;border-collapse:collapse;font-size:9.5px}th,td{border:1px solid #b8c4d1;padding:6px 5px;vertical-align:top}th{background:#edf3f9;text-align:center}td.num{text-align:right;white-space:nowrap}.foot{margin-top:10px;font-size:8px;color:#7a8797;text-align:right}@page{size:A4;margin:0}@media print{.report{padding:10mm}}</style></head><body><div class="report"><div class="brand"><div><h1>JIN Cashbook</h1><p>รายงานรายรับ-รายจ่าย</p></div><div class="date">${getPeriodLabel()}<br>${new Date().toLocaleDateString('th-TH')}</div></div><div class="summary"><div class="box"><b>รายรับ</b><strong class="green">฿${money(inc)}</strong></div><div class="box"><b>รายจ่าย</b><strong class="red">฿${money(out)}</strong></div><div class="box"><b>คงเหลือ</b><strong class="blue">${net < 0 ? '−' : ''}฿${money(Math.abs(net))}</strong></div></div><table><thead><tr><th>วันที่</th><th>ประเภท</th><th>รายการรายละเอียด</th><th>หมายเหตุ</th><th>จำนวนเงิน</th></tr></thead><tbody>${rows || '<tr><td colspan="5" style="text-align:center">ไม่มีรายการในช่วงที่เลือก</td></tr>'}</tbody></table><div class="foot">JIN Cashbook Mobile V2.4.2 · สร้างจากข้อมูลที่เก็บในเครื่อง</div></div></body></html>`;
-}
-function printReport() {
-  const w = window.open('', '_blank');
-  if (!w) { alert('เบราว์เซอร์บล็อกหน้าต่างพิมพ์ กรุณาอนุญาต Pop-up แล้วลองอีกครั้ง'); return; }
-  w.document.open(); w.document.write(buildPrintReport()); w.document.close();
-  const run = () => { w.focus(); w.print(); };
-  if (w.document.readyState === 'complete') setTimeout(run, 200); else w.onload = () => setTimeout(run, 200);
-}
+function escapeHtml(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function reportData(){const list=selectedEntries(),inc=list.filter(x=>x.type==="income").reduce((s,x)=>s+Number(x.amount||0),0),out=list.filter(x=>x.type==="expense").reduce((s,x)=>s+Number(x.amount||0),0);return{list,inc,out,net:inc-out};}
+function buildReportHtml(){const {list,inc,out,net}=reportData();const rows=list.length?list.map(x=>`<tr><td>${thaiDate(x.date)}</td><td>${x.type==="income"?"รายรับ":"รายจ่าย"}</td><td>${escapeHtml(x.description)}</td><td>${escapeHtml(x.note||"")}</td><td class="report-right ${x.type==="income"?"report-in":"report-out"}">${x.type==="income"?"+":"−"}฿${money(x.amount)}</td></tr>`).join(""):"<tr><td colspan=5 class=report-empty>ไม่มีรายการในช่วงที่เลือก</td></tr>";return `<div class="report-sheet"><div class="report-heading"><h1>JIN Cashbook</h1><h2>รายงานรายรับ-รายจ่าย</h2><div class="report-period">${getPeriodLabel()}</div><div class="report-generated">พิมพ์รายงานวันที่ ${thaiDate(today())}</div></div><div class="report-summary"><div class="rs income"><small>รายรับ</small><b>฿${money(inc)}</b></div><div class="rs expense"><small>รายจ่าย</small><b>฿${money(out)}</b></div><div class="rs balance"><small>คงเหลือ</small><b>${net<0?"−":""}฿${money(Math.abs(net))}</b></div><div class="rs count"><small>จำนวนรายการ</small><b>${list.length}</b></div></div><div class="report-table-wrap"><table class="report-table"><thead><tr><th>วันที่</th><th>ประเภท</th><th>รายการรายละเอียด</th><th>หมายเหตุ</th><th>จำนวนเงิน</th></tr></thead><tbody>${rows}</tbody></table></div><div class="report-footer">JIN Cashbook Mobile · รายงานจากข้อมูลที่เก็บในเครื่อง</div></div>`;}
+function showReport(){$("reportContent").innerHTML=buildReportHtml();$("reportView").classList.remove("hidden");document.body.classList.add("report-open");window.scrollTo(0,0);}
+function closeReport(){$("reportView").classList.add("hidden");document.body.classList.remove("report-open");go("home");}
+async function shareReport(){const {list,inc,out,net}=reportData();const text=["JIN Cashbook","รายงานรายรับ-รายจ่าย",getPeriodLabel(),"",`รายรับ: ฿${money(inc)}`,`รายจ่าย: ฿${money(out)}`,`คงเหลือ: ${net<0?"−":""}฿${money(Math.abs(net))}`,`จำนวนรายการ: ${list.length}`].join("\n");if(navigator.share){try{await navigator.share({title:"JIN Cashbook - รายงาน",text});return}catch(e){if(e?.name==="AbortError")return;}}try{await navigator.clipboard.writeText(text);alert("คัดลอกรายงานแล้ว สามารถนำไปวางใน LINE / Messenger / อีเมลได้")}catch(_){alert(text)}}
+function saveReportPdf(){window.print();}
 
 function init() {
   // All event handlers are wired only to elements that really exist in index.html.
@@ -380,7 +366,7 @@ function init() {
   $("backupQuick").onclick = backup;
   $("restoreQuick").onclick = () => $("restoreFile").click();
   $("csvQuick").onclick = csv;
-  $("printQuick").onclick = printReport;
+  $("printQuick").onclick = showReport;
   $("seeAllChart").onclick = () => go("summary");
   $("seeAll").onclick = () => go("history");
   $("seeAllQuick").onclick = () => go("history");
@@ -392,7 +378,10 @@ function init() {
   $("restoreBtn").onclick = () => $("restoreFile").click();
   $("restoreFile").onchange = restoreFile;
   $("csvBtn").onclick = csv;
-  $("printBtn").onclick = printReport;
+  $("reportBack").onclick = closeReport;
+  $("reportShare").onclick = shareReport;
+  $("reportPdf").onclick = saveReportPdf;
+  $("printBtn").onclick = showReport;
 
   const t = today();
   $("date").value = t;
