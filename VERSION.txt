@@ -1,4 +1,4 @@
-JIN Cashbook Mobile V2.4.2 – PDF Export FIX 5
-Base UI: V2.4.1 – No Auto Zoom
-Fix: PDF export/share works in Safari and Home Screen/PWA by opening generated PDF in browser/PDF viewer when native file-share is unavailable.
-No changes to IndexedDB data, Backup, Restore, or UI MASTER.
+JIN Cashbook Mobile V2.4.2 – PDF Export FIX 13
+Base: FIX12
+Enhancements: custom date-range filtering and quantity × unit-price calculation.
+UI MASTER preserved. Existing data remains compatible.

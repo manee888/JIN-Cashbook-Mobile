@@ -33,6 +33,21 @@
     <button data-mode="month">เดือนนี้</button>
     <button data-mode="year">ปีนี้</button>
     <button data-mode="all">ทั้งหมด</button>
+    <button data-mode="custom">กำหนดช่วง</button>
+  </div>
+
+  <div id="customRange" class="custom-range hidden">
+    <div class="custom-range-title">📅 เลือกช่วงวันที่ที่ต้องการดู</div>
+    <div class="range-fields">
+      <label>ตั้งแต่วันที่<input id="rangeStart" type="date"></label>
+      <label>ถึงวันที่<input id="rangeEnd" type="date"></label>
+    </div>
+    <div class="range-actions">
+      <button id="rangeThisMonth" type="button">เดือนนี้</button>
+      <button id="rangeLastMonth" type="button">เดือนที่แล้ว</button>
+      <button id="rangeThisYear" type="button">ปีนี้</button>
+      <button id="rangeApply" type="button" class="primary">ใช้ช่วงนี้</button>
+    </div>
   </div>
 
   <div class="money-grid">
@@ -115,8 +130,12 @@
     <div class="sheet-head"><div><span class="kicker">รายการใหม่</span><h3 id="formTitle">เพิ่มรายการ</h3></div><button id="closeModal" class="close">×</button></div>
     <div class="type-switch"><button id="incomeBtn" class="type income active">＋ รายรับ</button><button id="expenseBtn" class="type expense">－ รายจ่าย</button></div>
     <label>วันที่<input id="date" type="date"></label>
-    <label>จำนวนเงิน (บาท)<input id="amount" type="number" inputmode="decimal" min="0.01" step="0.01" placeholder="0.00"></label>
-    <label>รายการรายละเอียด<input id="description" maxlength="250" placeholder="เช่น ขายสินค้า / ซื้ออุปกรณ์"></label>
+    <div class="quantity-grid">
+      <label>จำนวน<input id="quantity" type="number" inputmode="decimal" min="0.01" step="1" placeholder="เช่น 50"></label>
+      <label>ราคาต่อหน่วย<input id="unitPrice" type="number" inputmode="decimal" min="0.01" step="0.01" placeholder="เช่น 350"></label>
+    </div>
+    <label>จำนวนเงินรวม (บาท)<input id="amount" type="number" inputmode="decimal" min="0.01" step="0.01" placeholder="0.00"><small class="calc-hint" id="calcHint">ใส่จำนวน × ราคาต่อหน่วย ระบบคำนวณให้อัตโนมัติ</small></label>
+    <label>รายการรายละเอียด<input id="description" maxlength="250" placeholder="เช่น แรม / ขายสินค้า / ซื้ออุปกรณ์"></label>
     <label>หมายเหตุ<textarea id="note" maxlength="1000" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)"></textarea></label>
     <div class="form-actions"><button id="cancelBtn" class="secondary">ยกเลิก</button><button id="saveBtn" class="primary">บันทึกรายการ</button></div>
   </div>
