@@ -7,7 +7,11 @@
 *{box-sizing:border-box}
 html{scroll-behavior:smooth;overflow-x:hidden}
 body{margin:0;overflow-x:hidden;background:linear-gradient(#eaf4ff,#f8fbff 55%,#edf4fb);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,"Noto Sans Thai",sans-serif;color:var(--ink);padding-bottom:88px}
-button,input,select,textarea{font:inherit}button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}button{cursor:pointer;border:0}button:active{transform:scale(.985)}
+button,input,select,textarea{font:inherit}
+/* iPhone/iPad Safari: keep form controls at 16px so focusing an input does not auto-zoom the page */
+input,select,textarea{font-size:16px;-webkit-text-size-adjust:100%;text-size-adjust:100%;}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}
+input:focus,select:focus,textarea:focus{font-size:16px;}button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}button{cursor:pointer;border:0}button:active{transform:scale(.985)}
 .hero{background:linear-gradient(180deg,#0b4edc,#0874ee);color:#fff;box-shadow:0 3px 12px rgba(0,70,190,.25);position:sticky;top:0;z-index:20}
 .hero-inner{max-width:720px;margin:auto;padding:9px 13px 10px;display:flex;align-items:center;justify-content:space-between}
 .brand{display:flex;align-items:center;gap:8px}.wallet-art{font-size:42px;line-height:1;filter:drop-shadow(0 3px 2px rgba(0,0,0,.22))}

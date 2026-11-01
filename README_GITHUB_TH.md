@@ -20,3 +20,7 @@
 ครั้งแรกต้องเปิดด้วย Safari (iPhone/iPad) หรือ Chrome (Android/Samsung) และให้หน้าเว็บโหลดจนเสร็จอย่างน้อย 1 ครั้ง เพื่อให้ Service Worker เก็บไฟล์ไว้สำหรับ Offline
 
 > ถ้าเปิดผ่าน LINE แล้วปุ่มไม่ทำงาน ให้เลือก “เปิดใน Safari/Chrome” ก่อน เพราะเบราว์เซอร์ภายในของแอปแชตอาจจำกัด Service Worker และการติดตั้ง PWA
+
+
+## V2.4.1 – แก้ iPhone/iPad เด้งซูม
+รุ่นนี้ตั้งขนาดตัวอักษรใน input/select/textarea เป็น 16px เพื่อป้องกัน Safari ซูมหน้าอัตโนมัติเมื่อแตะช่องจำนวนเงินหรือรายละเอียด และเพิ่ม cache version ใหม่ของ Service Worker.
