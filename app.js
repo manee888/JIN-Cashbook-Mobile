@@ -414,39 +414,79 @@ async function makeReportPdf(){
   for(let i=0;i<pageCount;i++){const c=document.createElement('canvas');drawReportPage(c,list,i,pageCount,inc,out,net);pages.push(c);}
   return await canvasPagesToPdf(pages);
 }
+function isStandalonePWA(){
+  return window.matchMedia && window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+
+function openPdfInBrowser(file){
+  const url = URL.createObjectURL(file);
+  // In iOS Home Screen/PWA mode, opening the Blob in a new browser context
+  // is much more reliable than navigator.share({files}) or <a download>.
+  const w = window.open(url, '_blank');
+  if (!w) {
+    const a = document.createElement('a');
+    a.href = url;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+  return true;
+}
+
 async function shareReport(){
   try{
     const file=new File([await makeReportPdf()],`JIN_Cashbook_${today()}.pdf`,{type:'application/pdf'});
-    if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){await navigator.share({title:'JIN Cashbook - รายงาน PDF',files:[file]});return;}
-    download(file,file.name);alert('สร้างไฟล์ PDF เรียบร้อยแล้ว สามารถนำไฟล์ไปส่ง LINE หรือเก็บไว้ในเครื่องได้');
-  }catch(e){if(e?.name==='AbortError')return;alert('สร้าง/แชร์ PDF ไม่สำเร็จ: '+(e?.message||e));}
-}
-async function saveReportPdf(){
-  // Use the same proven Web Share file flow as the Share button.
-  // This is more reliable on mobile browsers than window.print() or a download-only anchor.
-  try{
-    const pdfBlob = await makeReportPdf();
-    const file = new File([pdfBlob], `JIN_Cashbook_${today()}.pdf`, {type:'application/pdf'});
-    if (navigator.share) {
-      if (!navigator.canShare || navigator.canShare({files:[file]})) {
-        await navigator.share({
-          title:'JIN Cashbook - PDF รายงาน',
-          text:'เลือก LINE, Files, Google Drive หรือแอปที่ต้องการ เพื่อส่งหรือเก็บไฟล์ PDF',
-          files:[file]
-        });
-        return;
+    // Safari browser: use the native file share when supported.
+    if(!isStandalonePWA() && navigator.share){
+      try{
+        if(!navigator.canShare || navigator.canShare({files:[file]})){
+          await navigator.share({title:'JIN Cashbook - รายงาน PDF',files:[file]});
+          return;
+        }
+      }catch(e){
+        if(e?.name==='AbortError') return;
       }
     }
-    const url=URL.createObjectURL(file);
-    const a=document.createElement('a');
-    a.href=url; a.download=file.name; a.rel='noopener';
-    document.body.appendChild(a); a.click();
-    setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},3000);
-    alert('สร้างไฟล์ PDF แล้ว: '+file.name+'\nหากต้องการส่ง LINE ให้เปิดไฟล์จากโฟลเดอร์ดาวน์โหลดแล้วกดแชร์');
+    // Home Screen/PWA or unsupported file-share: open the PDF in the browser.
+    // The iOS PDF viewer then provides its own Share button for LINE/Files/etc.
+    openPdfInBrowser(file);
+  }catch(e){
+    if(e?.name==='AbortError')return;
+    console.error('shareReport',e);
+    alert('สร้าง/แชร์ PDF ไม่สำเร็จ: '+(e?.message||e));
+  }
+}
+
+async function saveReportPdf(){
+  try{
+    const file = new File([await makeReportPdf()], `JIN_Cashbook_${today()}.pdf`, {type:'application/pdf'});
+
+    // Browser mode: native file share is the cleanest route.
+    if(!isStandalonePWA() && navigator.share){
+      try{
+        if(!navigator.canShare || navigator.canShare({files:[file]})){
+          await navigator.share({
+            title:'JIN Cashbook - PDF รายงาน',
+            files:[file]
+          });
+          return;
+        }
+      }catch(e){
+        if(e?.name==='AbortError') return;
+      }
+    }
+
+    // iOS Home Screen/PWA cannot reliably download/share Blob files directly.
+    // Open the generated PDF in the browser/PDF viewer instead. From there the
+    // user can tap Share and choose LINE, Files, Drive, etc.
+    openPdfInBrowser(file);
   }catch(e){
     if(e?.name==='AbortError') return;
     console.error('saveReportPdf',e);
-    alert('สร้าง/บันทึก PDF ไม่สำเร็จ\n'+(e?.message||e));
+    alert('สร้าง/เปิด PDF ไม่สำเร็จ\n'+(e?.message||e));
   }
 }
 
