@@ -1,0 +1,17 @@
+{
+  "name": "JIN Cashbook Mobile",
+  "short_name": "JIN Cashbook",
+  "lang": "th",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f3f6fc",
+  "theme_color": "#172554",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
