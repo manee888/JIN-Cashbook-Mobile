@@ -422,12 +422,32 @@ async function shareReport(){
   }catch(e){if(e?.name==='AbortError')return;alert('สร้าง/แชร์ PDF ไม่สำเร็จ: '+(e?.message||e));}
 }
 async function saveReportPdf(){
+  // Use the same proven Web Share file flow as the Share button.
+  // This is more reliable on mobile browsers than window.print() or a download-only anchor.
   try{
-    const file=new File([await makeReportPdf()],`JIN_Cashbook_${today()}.pdf`,{type:'application/pdf'});
-    if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){await navigator.share({title:'JIN Cashbook - บันทึก PDF',text:'เลือก LINE, Files หรือแอปที่ต้องการ เพื่อส่งหรือเก็บไฟล์ PDF',files:[file]});return;}
-    const a=document.createElement('a');a.href=URL.createObjectURL(file);a.download=file.name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},2000);
-    alert('บันทึกไฟล์ PDF แล้ว: '+file.name);
-  }catch(e){if(e?.name==='AbortError')return;alert('บันทึก PDF ไม่สำเร็จ: '+(e?.message||e));}
+    const pdfBlob = await makeReportPdf();
+    const file = new File([pdfBlob], `JIN_Cashbook_${today()}.pdf`, {type:'application/pdf'});
+    if (navigator.share) {
+      if (!navigator.canShare || navigator.canShare({files:[file]})) {
+        await navigator.share({
+          title:'JIN Cashbook - PDF รายงาน',
+          text:'เลือก LINE, Files, Google Drive หรือแอปที่ต้องการ เพื่อส่งหรือเก็บไฟล์ PDF',
+          files:[file]
+        });
+        return;
+      }
+    }
+    const url=URL.createObjectURL(file);
+    const a=document.createElement('a');
+    a.href=url; a.download=file.name; a.rel='noopener';
+    document.body.appendChild(a); a.click();
+    setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},3000);
+    alert('สร้างไฟล์ PDF แล้ว: '+file.name+'\nหากต้องการส่ง LINE ให้เปิดไฟล์จากโฟลเดอร์ดาวน์โหลดแล้วกดแชร์');
+  }catch(e){
+    if(e?.name==='AbortError') return;
+    console.error('saveReportPdf',e);
+    alert('สร้าง/บันทึก PDF ไม่สำเร็จ\n'+(e?.message||e));
+  }
 }
 
 function init() {

@@ -1,5 +1,3 @@
-V2.4.2 Report UI Fix 2
-- Keep V2.4.1 No Auto Zoom UI
-- Report full-screen with Back + Share
-- Save PDF opens a dedicated print tab with a visible Save PDF / Print button
-- Uses browser/system Save as PDF
+JIN Cashbook Mobile V2.4.2 – PDF SHARE FIX 4
+Base UI: V2.4.1 – No Auto Zoom
+PDF button now uses the same proven file-share flow as the working Share button. No window.print().
