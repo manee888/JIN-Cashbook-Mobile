@@ -405,7 +405,7 @@ function drawReportPage(canvas, list, pageIndex, pageCount, inc, out, net){
   ctx.fillStyle='#eaf1f8';ctx.fillRect(M,y,W-2*M,52);ctx.fillStyle='#29425d';ctx.font='bold 18px Arial,"Noto Sans Thai",sans-serif';heads.forEach((h,i)=>ctx.fillText(h,cols[i]+8,y+33));y+=52;
   const rowH=66; const usableBottom=H-90;
   const rows=list.slice(pageIndex*20,(pageIndex+1)*20);
-  rows.forEach((x,ri)=>{ctx.strokeStyle='#cbd7e5';ctx.strokeRect(M,y,W-2*M,rowH);ctx.fillStyle=ri%2?'#fff':'#f8fbfe';ctx.fillRect(M,y,W-2*M,rowH);ctx.strokeStyle='#cbd7e5';[cols[1],cols[2],cols[3],cols[4]].forEach(xx=>{ctx.beginPath();ctx.moveTo(xx,y);ctx.lineTo(xx,y+rowH);ctx.stroke();});ctx.fillStyle='#182536';ctx.font='16px Arial,"Noto Sans Thai",sans-serif';ctx.fillText(thaiDate(x.date),cols[0]+8,y+25);ctx.fillText(x.type==='income'?'รายรับ':'รายจ่าย',cols[1]+8,y+25);ctx.fillText(String(x.description||'').slice(0,32),cols[2]+8,y+25);ctx.fillText(String(x.note||'').slice(0,20),cols[3]+8,y+25);ctx.textAlign='right';ctx.fillStyle=x.type==='income'?'#0a9f36':'#e91d43';ctx.font='bold 17px Arial,"Noto Sans Thai",sans-serif';ctx.fillText(`${x.type==='income'?'+':'−'}฿${money(x.amount)}`,W-M-10,y+25);ctx.textAlign='left';y+=rowH;});
+  rows.forEach((x,ri)=>{ctx.strokeStyle='#cbd7e5';ctx.strokeRect(M,y,W-2*M,rowH);ctx.fillStyle=ri%2?'#fff':'#f8fbfe';ctx.fillRect(M,y,W-2*M,rowH);ctx.strokeStyle='#cbd7e5';[cols[1],cols[2],cols[3],cols[4]].forEach(col=>{ctx.beginPath();ctx.moveTo(col,y);ctx.lineTo(col,y+rowH);ctx.stroke();});ctx.fillStyle='#182536';ctx.font='16px Arial,"Noto Sans Thai",sans-serif';ctx.fillText(thaiDate(x.date),cols[0]+8,y+25);ctx.fillText(x.type==='income'?'รายรับ':'รายจ่าย',cols[1]+8,y+25);ctx.fillText(String(x.description||'').slice(0,32),cols[2]+8,y+25);ctx.fillText(String(x.note||'').slice(0,20),cols[3]+8,y+25);ctx.textAlign='right';ctx.fillStyle=x.type==='income'?'#0a9f36':'#e91d43';ctx.font='bold 17px Arial,"Noto Sans Thai",sans-serif';ctx.fillText(`${x.type==='income'?'+':'−'}฿${money(x.amount)}`,W-M-10,y+25);ctx.textAlign='left';y+=rowH;});
   if(!rows.length){ctx.fillStyle='#7b8998';ctx.font='20px Arial,"Noto Sans Thai",sans-serif';ctx.textAlign='center';ctx.fillText('ไม่มีรายการในช่วงที่เลือก',W/2,y+45);ctx.textAlign='left';}
   ctx.fillStyle='#8996a5';ctx.font='15px Arial,"Noto Sans Thai",sans-serif';ctx.textAlign='center';ctx.fillText(`JIN Cashbook Mobile · หน้า ${pageIndex+1}/${pageCount}`,W/2,H-35);ctx.textAlign='left';
 }
@@ -532,7 +532,7 @@ function init() {
   }).catch(() => render());
 
   if ("serviceWorker" in navigator && window.isSecureContext) {
-    navigator.serviceWorker.register("sw.js").catch(() => {});
+    navigator.serviceWorker.register("sw.js?v=fix7").catch(() => {});
   }
 }
 
