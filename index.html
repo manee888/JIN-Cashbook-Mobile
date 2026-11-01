@@ -1,13 +1,125 @@
-<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5"><meta name="theme-color" content="#1769e0"><link rel="manifest" href="./manifest.json"><link rel="stylesheet" href="./styles.css"><title>JIN Cashbook</title></head><body>
-<header><div>👛 <b><i>JIN</i> Cashbook</b><small>บันทึกรายรับ-รายจ่าย อย่างง่าย ใช้ได้ทุกที่</small></div><button id="settings">⚙️</button></header>
-<main><div class="periods"><button class="active" data-p="today">วันนี้</button><button data-p="month">เดือนนี้</button><button data-p="year">ปีนี้</button><button data-p="all">ทั้งหมด</button></div>
-<div class="cards"><div class="income">🪙<small>รายรับวันนี้</small><strong id="inc">0.00</strong> บาท</div><div class="expense">👛<small>รายจ่ายวันนี้</small><strong id="exp">0.00</strong> บาท</div></div>
-<div class="balance">📈 <span>คงเหลือวันนี้<br><strong id="bal">0.00</strong> บาท</span></div>
-<div class="quick">
-<button data-a="add">➕<b>เพิ่มรายการ</b><small>รายรับ/รายจ่าย</small></button><button data-a="history">🗓️<b>รายวัน / รายเดือน</b></button><button data-a="summary">📊<b>สรุปยอด</b></button><button data-a="search">🔎<b>ค้นหา</b></button>
-<button data-a="backup">☁️<b>Backup</b><small>ข้อมูล</small></button><button data-a="restore">♻️<b>Restore</b><small>ข้อมูล</small></button><button data-a="csv">📤<b>ส่งออก</b><small>CSV</small></button><button data-a="print">🖨️<b>พิมพ์รายงาน</b><small>PDF</small></button></div>
-<section><h3>📊 รายการล่าสุด</h3><div id="list"></div></section></main>
-<button class="fab" data-a="add">＋ เพิ่มรายการ</button><nav><button data-a="home">🏠<small>หน้าหลัก</small></button><button data-a="history">🕘<small>ประวัติ</small></button><button data-a="summary">📊<small>สรุปยอด</small></button><button data-a="settings">⚙️<small>ตั้งค่า</small></button></nav>
-<div id="modal" class="hide"><div class="sheet"><b>เพิ่มรายการ</b><button id="close">✕</button><label>ประเภท<select id="type"><option value="expense">รายจ่าย</option><option value="income">รายรับ</option></select></label><label>จำนวนเงิน<input id="amount" type="number" inputmode="decimal" step=".01"></label><label>รายการรายละเอียด<input id="desc"></label><label>หมายเหตุ<textarea id="note"></textarea></label><label>วันที่<input id="date" type="date"></label><button id="save" class="save">💾 บันทึก</button></div></div>
-<div id="page" class="hide"><div class="sheet"><b id="ptitle"></b><button id="pclose">✕</button><div id="pbody"></div></div></div>
-<input id="file" type="file" accept=".json" hidden><div id="print"></div><script src="app.js"></script></body></html>
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0867e9">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="JIN Cashbook">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<title>JIN Cashbook Mobile</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="hero">
+  <div class="hero-inner">
+    <div class="brand">
+      <div class="wallet-art">👛</div>
+      <div>
+        <div class="brand-title"><span>JIN</span> Cashbook</div>
+        <div class="brand-sub">บันทึกรายรับ-รายจ่าย อย่างง่าย ใช้ได้ทุกที่</div>
+      </div>
+    </div>
+    <button class="header-settings" id="headerSettings" aria-label="ตั้งค่า">⚙</button>
+  </div>
+</header>
+
+<main>
+<section id="home" class="page active">
+  <div class="period-pills">
+    <button data-mode="day" class="active">วันนี้</button>
+    <button data-mode="month">เดือนนี้</button>
+    <button data-mode="year">ปีนี้</button>
+    <button data-mode="all">ทั้งหมด</button>
+  </div>
+
+  <div class="money-grid">
+    <div class="money income">
+      <div class="money-top"><div class="money-icon">🪙</div><span>รายรับวันนี้</span></div>
+      <strong id="incomeTotal">฿0.00</strong><small>บาท</small>
+    </div>
+    <div class="money expense">
+      <div class="money-top"><div class="money-icon">👛</div><span>รายจ่ายวันนี้</span></div>
+      <strong id="expenseTotal">฿0.00</strong><small>บาท</small>
+    </div>
+  </div>
+
+  <div class="balance-card">
+    <div class="balance-icon">📊</div>
+    <div class="balance-copy"><span>คงเหลือวันนี้</span><strong id="netTotal">฿0.00</strong></div>
+    <div class="balance-unit">บาท</div>
+  </div>
+
+  <div class="quick-grid">
+    <button id="quickIncome" class="quick-card add"><span class="quick-icon">＋</span><b>เพิ่มรายการ</b><small>(รายรับ/รายจ่าย)</small></button>
+    <button id="quickExpense" class="quick-card day"><span class="quick-icon">▣</span><b>รายวัน</b><small>รายเดือน</small></button>
+    <button id="quickBackup" class="quick-card summary"><span class="quick-icon">▥</span><b>สรุปยอด</b><small>รายรับ</small></button>
+    <button id="seeAllQuick" class="quick-card search"><span class="quick-icon">⌕</span><b>ค้นหา</b><small>รายการ</small></button>
+    <button id="backupQuick" class="quick-card backup"><span class="quick-icon">☁</span><b>Backup</b><small>ข้อมูล</small></button>
+    <button id="restoreQuick" class="quick-card restore"><span class="quick-icon">↻</span><b>Restore</b><small>ข้อมูล</small></button>
+    <button id="csvQuick" class="quick-card export"><span class="quick-icon">⇧</span><b>ส่งออก</b><small>CSV/PDF</small></button>
+    <button id="printQuick" class="quick-card print"><span class="quick-icon">▣</span><b>พิมพ์</b><small>รายงาน</small></button>
+  </div>
+
+  <section class="panel chart-panel">
+    <div class="section-title blue-title"><span class="title-icon">▥</span><h3>สรุปรายรับรายจ่ายรายเดือน</h3><button id="seeAllChart" class="see-link">ดูทั้งหมด ›</button></div>
+    <div class="chart-legend"><span><i class="dot green"></i>รายรับ</span><span><i class="dot red"></i>รายจ่าย</span></div>
+    <div id="monthlyChart" class="monthly-chart"></div>
+  </section>
+
+  <section class="panel recent-panel">
+    <div class="section-title blue-title"><span class="title-icon star">★</span><h3>รายการล่าสุด</h3><button class="see-link" id="seeAll">ดูทั้งหมด ›</button></div>
+    <div id="recentList"></div>
+  </section>
+</section>
+
+<section id="history" class="page">
+  <div class="page-title"><span>รายการทั้งหมด</span><h2>ประวัติรายการ</h2><p>ค้นหา แก้ไข หรือลบรายการได้จากที่นี่</p></div>
+  <div class="panel history-panel"><input id="search" class="search" placeholder="🔎 ค้นหารายละเอียด / หมายเหตุ"><div id="list"></div></div>
+</section>
+
+<section id="summary" class="page">
+  <div class="page-title"><span>รายงาน</span><h2>สรุปยอด</h2><p>ภาพรวมรายรับ รายจ่าย และจำนวนรายการ</p></div>
+  <div class="report-grid"><div><small>รายรับ</small><b id="reportIncome">฿0.00</b></div><div><small>รายจ่าย</small><b id="reportExpense">฿0.00</b></div><div><small>คงเหลือ</small><b id="reportNet">฿0.00</b></div><div><small>จำนวนรายการ</small><b id="reportCount">0</b></div></div>
+  <div class="panel"><h3 class="plain-title">รายละเอียดช่วงที่เลือก</h3><div id="reportText" class="report-text"></div></div>
+</section>
+
+<section id="settings" class="page">
+  <div class="page-title"><span>เครื่องมือ</span><h2>ตั้งค่า & สำรองข้อมูล</h2><p>ข้อมูลหลักอยู่ในมือถือ ไม่จำเป็นต้องใช้ Cloud</p></div>
+  <div class="panel">
+    <div class="setting-row"><div><b>สำรองข้อมูล JSON</b><small>ไฟล์สำหรับย้ายไปเครื่องอื่น</small></div><button class="primary" id="backupBtn">สำรอง</button></div>
+    <div class="setting-row"><div><b>กู้คืนข้อมูล JSON</b><small>แทนที่ข้อมูลในเครื่องด้วยไฟล์สำรอง</small></div><button class="secondary" id="restoreBtn">กู้คืน</button></div>
+    <div class="setting-row"><div><b>ส่งออก CSV</b><small>เปิดต่อใน Excel / Google Sheets</small></div><button class="secondary" id="csvBtn">ส่งออก</button></div>
+    <div class="setting-row"><div><b>พิมพ์ / PDF</b><small>พิมพ์รายการที่กำลังแสดง</small></div><button class="secondary" id="printBtn">พิมพ์</button></div>
+    <input id="restoreFile" type="file" accept=".json,application/json" class="hidden">
+  </div>
+  <div class="panel help"><h3 class="plain-title">ใช้งานบนมือถือ</h3><ol><li>เปิดด้วย Chrome หรือ Safari</li><li>เลือก “เพิ่มไปยังหน้าจอโฮม”</li><li>หลังติดตั้งแล้ว ใช้งานออฟไลน์ได้</li><li>แนะนำสำรอง JSON เป็นระยะ และเก็บไว้ Google Drive / iCloud / USB</li></ol></div>
+</section>
+</main>
+
+<button class="fab" id="fab">＋ <span>เพิ่มรายการ</span></button>
+
+<nav class="bottom-nav">
+  <button data-page="home" class="nav active"><i>⌂</i><span>หน้าหลัก</span></button>
+  <button data-page="history" class="nav"><i>☷</i><span>ประวัติ</span></button>
+  <button data-page="summary" class="nav"><i>▥</i><span>สรุปยอด</span></button>
+  <button data-page="settings" class="nav"><i>⚙</i><span>ตั้งค่า</span></button>
+</nav>
+
+<div id="modal" class="modal hidden">
+  <div class="sheet">
+    <div class="sheet-head"><div><span class="kicker">รายการใหม่</span><h3 id="formTitle">เพิ่มรายการ</h3></div><button id="closeModal" class="close">×</button></div>
+    <div class="type-switch"><button id="incomeBtn" class="type income active">＋ รายรับ</button><button id="expenseBtn" class="type expense">－ รายจ่าย</button></div>
+    <label>วันที่<input id="date" type="date"></label>
+    <label>จำนวนเงิน (บาท)<input id="amount" type="number" inputmode="decimal" min="0.01" step="0.01" placeholder="0.00"></label>
+    <label>รายการรายละเอียด<input id="description" maxlength="250" placeholder="เช่น ขายสินค้า / ซื้ออุปกรณ์"></label>
+    <label>หมายเหตุ<textarea id="note" maxlength="1000" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)"></textarea></label>
+    <div class="form-actions"><button id="cancelBtn" class="secondary">ยกเลิก</button><button id="saveBtn" class="primary">บันทึกรายการ</button></div>
+  </div>
+</div>
+<footer>JIN Cashbook Mobile · รูปแบบข้อมูล JIN_CASHBOOK / version 1</footer>
+<script src="app.js"></script>
+</body>
+</html>
