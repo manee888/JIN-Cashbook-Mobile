@@ -1,6 +1,8 @@
-JIN Cashbook Mobile V2
-- รุ่นมือถือ Offline-first
-- ข้อมูลเก็บในเครื่องด้วย IndexedDB
-- Backup/Restore JSON ใช้รูปแบบเดียวกับ JIN Cashbook V3
-- รองรับ CSV และพิมพ์/PDF
-- ใช้กับ GitHub Pages เพื่อเปิดติดตั้งเป็น PWA บน Android/iPhone/iPad
+JIN Cashbook Mobile V2.4.2
+
+แก้ปุ่ม "พิมพ์รายงาน" แล้ว
+กด พิมพ์รายงาน -> เปิดหน้าพิมพ์ของมือถือ/เบราว์เซอร์ -> เลือก Save as PDF หรือแชร์/บันทึกไฟล์ตามระบบ
+
+ยังคงใช้ IndexedDB + Local Storage และ Service Worker สำหรับ Offline
+มี JSON Backup / Restore และ CSV Export
+ช่องกรอกใช้ 16px ขึ้นไปเพื่อป้องกัน Safari auto-zoom
