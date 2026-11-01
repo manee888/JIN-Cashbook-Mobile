@@ -438,20 +438,27 @@ function openPdfInBrowser(file){
 
 async function shareReport(){
   try{
-    const file=new File([await makeReportPdf()],`JIN_Cashbook_${today()}.pdf`,{type:'application/pdf'});
-    // Safari browser: use the native file share when supported.
-    if(!isStandalonePWA() && navigator.share){
+    const blob = await makeReportPdf();
+    const file = new File([blob], `JIN_Cashbook_${today()}.pdf`, {type:'application/pdf'});
+
+    // FIX10: Use the native Web Share API with the real PDF File in BOTH
+    // Safari and Home Screen/PWA. Do not route PWA through blob: PDF viewer,
+    // because iOS can turn that viewer share into Unknown.pdf / empty files.
+    if(navigator.share && (!navigator.canShare || navigator.canShare({files:[file]}))){
       try{
-        if(!navigator.canShare || navigator.canShare({files:[file]})){
-          await navigator.share({title:'JIN Cashbook - รายงาน PDF',files:[file]});
-          return;
-        }
+        await navigator.share({
+          title:'JIN Cashbook - รายงาน PDF',
+          text:'รายงานรายรับ-รายจ่าย JIN Cashbook',
+          files:[file]
+        });
+        return;
       }catch(e){
         if(e?.name==='AbortError') return;
+        console.warn('native PDF share failed, using fallback', e);
       }
     }
-    // Home Screen/PWA or unsupported file-share: open the PDF in the browser.
-    // The iOS PDF viewer then provides its own Share button for LINE/Files/etc.
+
+    // Fallback for browsers that do not support file sharing.
     openPdfInBrowser(file);
   }catch(e){
     if(e?.name==='AbortError')return;
@@ -462,26 +469,25 @@ async function shareReport(){
 
 async function saveReportPdf(){
   try{
-    const file = new File([await makeReportPdf()], `JIN_Cashbook_${today()}.pdf`, {type:'application/pdf'});
+    const blob = await makeReportPdf();
+    const file = new File([blob], `JIN_Cashbook_${today()}.pdf`, {type:'application/pdf'});
 
-    // Browser mode: native file share is the cleanest route.
-    if(!isStandalonePWA() && navigator.share){
+    // FIX10: Prefer the native file share in both Safari and Home Screen/PWA.
+    // This keeps the original PDF bytes and filename intact.
+    if(navigator.share && (!navigator.canShare || navigator.canShare({files:[file]}))){
       try{
-        if(!navigator.canShare || navigator.canShare({files:[file]})){
-          await navigator.share({
-            title:'JIN Cashbook - PDF รายงาน',
-            files:[file]
-          });
-          return;
-        }
+        await navigator.share({
+          title:'JIN Cashbook - PDF รายงาน',
+          text:'รายงานรายรับ-รายจ่าย JIN Cashbook',
+          files:[file]
+        });
+        return;
       }catch(e){
         if(e?.name==='AbortError') return;
+        console.warn('native PDF save/share failed, using fallback', e);
       }
     }
 
-    // iOS Home Screen/PWA cannot reliably download/share Blob files directly.
-    // Open the generated PDF in the browser/PDF viewer instead. From there the
-    // user can tap Share and choose LINE, Files, Drive, etc.
     openPdfInBrowser(file);
   }catch(e){
     if(e?.name==='AbortError') return;
@@ -532,7 +538,7 @@ function init() {
   }).catch(() => render());
 
   if ("serviceWorker" in navigator && window.isSecureContext) {
-    navigator.serviceWorker.register("sw.js?v=fix7").catch(() => {});
+    navigator.serviceWorker.register("sw.js?v=fix10").catch(() => {});
   }
 }
 
