@@ -349,19 +349,85 @@ function reportData(){const list=selectedEntries(),inc=list.filter(x=>x.type==="
 function buildReportHtml(){const {list,inc,out,net}=reportData();const rows=list.length?list.map(x=>`<tr><td>${thaiDate(x.date)}</td><td>${x.type==="income"?"รายรับ":"รายจ่าย"}</td><td>${escapeHtml(x.description)}</td><td>${escapeHtml(x.note||"")}</td><td class="report-right ${x.type==="income"?"report-in":"report-out"}">${x.type==="income"?"+":"−"}฿${money(x.amount)}</td></tr>`).join(""):"<tr><td colspan=5 class=report-empty>ไม่มีรายการในช่วงที่เลือก</td></tr>";return `<div class="report-sheet"><div class="report-heading"><h1>JIN Cashbook</h1><h2>รายงานรายรับ-รายจ่าย</h2><div class="report-period">${getPeriodLabel()}</div><div class="report-generated">พิมพ์รายงานวันที่ ${thaiDate(today())}</div></div><div class="report-summary"><div class="rs income"><small>รายรับ</small><b>฿${money(inc)}</b></div><div class="rs expense"><small>รายจ่าย</small><b>฿${money(out)}</b></div><div class="rs balance"><small>คงเหลือ</small><b>${net<0?"−":""}฿${money(Math.abs(net))}</b></div><div class="rs count"><small>จำนวนรายการ</small><b>${list.length}</b></div></div><div class="report-table-wrap"><table class="report-table"><thead><tr><th>วันที่</th><th>ประเภท</th><th>รายการรายละเอียด</th><th>หมายเหตุ</th><th>จำนวนเงิน</th></tr></thead><tbody>${rows}</tbody></table></div><div class="report-footer">JIN Cashbook Mobile · รายงานจากข้อมูลที่เก็บในเครื่อง</div></div>`;}
 function showReport(){$("reportContent").innerHTML=buildReportHtml();$("reportView").classList.remove("hidden");document.body.classList.add("report-open");window.scrollTo(0,0);}
 function closeReport(){$("reportView").classList.add("hidden");document.body.classList.remove("report-open");go("home");}
-async function shareReport(){const {list,inc,out,net}=reportData();const text=["JIN Cashbook","รายงานรายรับ-รายจ่าย",getPeriodLabel(),"",`รายรับ: ฿${money(inc)}`,`รายจ่าย: ฿${money(out)}`,`คงเหลือ: ${net<0?"−":""}฿${money(Math.abs(net))}`,`จำนวนรายการ: ${list.length}`].join("\n");if(navigator.share){try{await navigator.share({title:"JIN Cashbook - รายงาน",text});return}catch(e){if(e?.name==="AbortError")return;}}try{await navigator.clipboard.writeText(text);alert("คัดลอกรายงานแล้ว สามารถนำไปวางใน LINE / Messenger / อีเมลได้")}catch(_){alert(text)}}
-function saveReportPdf(){
-  const html = buildReportHtml();
-  const w = window.open("", "_blank");
-  if(!w){
-    alert("เบราว์เซอร์บล็อกหน้าต่างพิมพ์ กรุณาอนุญาต Pop-up แล้วกด Save PDF อีกครั้ง");
-    return;
+async function wrapCanvasText(ctx, text, maxWidth){
+  const out=[]; let line="";
+  for(const ch of String(text??"")){
+    const test=line+ch;
+    if(ctx.measureText(test).width>maxWidth && line){out.push(line);line=ch;}else line=test;
   }
-  w.document.open();
-  w.document.write(`<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>JIN Cashbook - Save PDF</title><style>
-    *{box-sizing:border-box}body{margin:0;background:#eef5fd;color:#182536;font-family:Arial,"Noto Sans Thai",sans-serif}.printbar{position:sticky;top:0;z-index:10;background:linear-gradient(135deg,#0758dc,#087bf4);color:#fff;padding:10px;display:flex;gap:8px;align-items:center;box-shadow:0 3px 12px rgba(0,50,140,.25)}.printbar button{border:0;border-radius:10px;padding:10px 13px;font-weight:900;color:#fff;background:rgba(255,255,255,.16)}.printbar .go{margin-left:auto;background:#ff8a00}.printbar small{font-weight:900}.wrap{max-width:900px;margin:auto;padding:12px}.report-sheet{background:#fff;padding:20px;box-shadow:0 4px 18px rgba(20,60,110,.12);border-radius:14px}.report-heading{text-align:center}.report-heading h1{margin:0;color:#0758dc;font-size:25px}.report-heading h2{margin:2px 0;font-size:17px}.report-period{font-weight:900;color:#30485f;margin-top:6px}.report-generated{font-size:10px;color:#7a8999;margin-top:2px}.report-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:16px 0}.rs{border-radius:12px;padding:10px;color:#fff}.rs small{display:block;font-size:10px}.rs b{display:block;font-size:16px;margin-top:4px}.rs.income{background:#12b95b}.rs.expense{background:#ef3b5d}.rs.balance{background:#1769e0}.rs.count{background:#7657db}.report-table{width:100%;border-collapse:collapse;font-size:11px}.report-table th,.report-table td{border:1px solid #cbd7e5;padding:7px}.report-table th{background:#edf3fa;color:#29425d}.report-right{text-align:right;white-space:nowrap}.report-in{color:#0a9f36;font-weight:900}.report-out{color:#e91d43;font-weight:900}.report-empty{text-align:center;color:#7b8998;padding:20px}.report-footer{text-align:center;color:#8996a5;font-size:9px;margin-top:12px}@media(max-width:600px){.report-sheet{padding:12px;border-radius:10px}.report-summary{grid-template-columns:1fr 1fr}.report-table{font-size:9px}.report-table th,.report-table td{padding:5px}.report-table th:nth-child(4),.report-table td:nth-child(4){display:none}}@media print{body{background:#fff}.printbar{display:none!important}.wrap{max-width:none;padding:0}.report-sheet{box-shadow:none;border-radius:0;padding:0}.report-table{font-size:9pt}.report-table th,.report-table td{padding:5px}.report-table th:nth-child(4),.report-table td:nth-child(4){display:table-cell}@page{size:A4;margin:10mm}}
-  </style></head><body><div class="printbar"><button onclick="window.close()">← กลับรายงาน</button><small>📄 JIN Cashbook · เตรียมบันทึก PDF</small><button class="go" onclick="doPrint()">⬇ Save PDF / พิมพ์</button></div><main class="wrap">${html}</main><script>function doPrint(){setTimeout(function(){window.print()},80)}window.addEventListener('load',function(){setTimeout(function(){window.print()},350)});</script></body></html>`);
-  w.document.close();
+  if(line||!out.length) out.push(line);
+  return out;
+}
+function pdfEscapeBytes(bytes){return bytes;}
+function b64ToBytes(b64){const bin=atob(b64);const a=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)a[i]=bin.charCodeAt(i);return a;}
+async function canvasPagesToPdf(pages){
+  const W=595,H=842; const objs=[]; const add=o=>{objs.push(o);return objs.length;};
+  const catalog=add(null), pagesObj=add(null), pageIds=[];
+  const fontObj=add('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>');
+  for(const canvas of pages){
+    const data=canvas.toDataURL('image/jpeg',0.92).split(',')[1]; const img=b64ToBytes(data);
+    const imgObj=add({jpeg:img,w:canvas.width,h:canvas.height});
+    const content=`q\n${W} 0 0 ${H} 0 0 cm\n/Im0 Do\nQ\n`;
+    const contentObj=add(content);
+    const pageObj=add({page:true,contentObj,imgObj}); pageIds.push(pageObj);
+  }
+  objs[catalog-1]=`<< /Type /Catalog /Pages ${pagesObj} 0 R >>`;
+  objs[pagesObj-1]=`<< /Type /Pages /Kids [${pageIds.map(x=>x+' 0 R').join(' ')}] /Count ${pageIds.length} >>`;
+  const chunks=[]; const enc=new TextEncoder(); let offset=0; const offsets=[0];
+  const pushBytes=b=>{chunks.push(b);offset+=b.length;};
+  pushBytes(enc.encode('%PDF-1.4\n%\xFF\xFF\xFF\xFF\n'));
+  for(let i=0;i<objs.length;i++){
+    offsets.push(offset); const n=i+1; const o=objs[i]; let head=`${n} 0 obj\n`;
+    if(typeof o==='string'){
+      const body=o; pushBytes(enc.encode(head+body+'\nendobj\n'));
+    }else if(o && o.jpeg){
+      pushBytes(enc.encode(head+`<< /Type /XObject /Subtype /Image /Width ${o.w} /Height ${o.h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${o.jpeg.length} >>\nstream\n`));
+      pushBytes(o.jpeg); pushBytes(enc.encode('\nendstream\nendobj\n'));
+    }else if(o && o.page){
+      pushBytes(enc.encode(head+`<< /Type /Page /Parent ${pagesObj} 0 R /MediaBox [0 0 ${W} ${H}] /Resources << /XObject << /Im0 ${o.imgObj} 0 R >> >> /Contents ${o.contentObj} 0 R >>\nendobj\n`));
+    }
+  }
+  const xref=offset; pushBytes(enc.encode(`xref\n0 ${objs.length+1}\n0000000000 65535 f \n`));
+  for(let i=1;i<=objs.length;i++)pushBytes(enc.encode(String(offsets[i]).padStart(10,'0')+' 00000 n \n'));
+  pushBytes(enc.encode(`trailer\n<< /Size ${objs.length+1} /Root ${catalog} 0 R >>\nstartxref\n${xref}\n%%EOF`));
+  const blob=new Blob(chunks,{type:'application/pdf'}); return blob;
+}
+function drawReportPage(canvas, list, pageIndex, pageCount, inc, out, net){
+  const ctx=canvas.getContext('2d'); const S=2, W=1240,H=1754, M=70; canvas.width=W;canvas.height=H;
+  ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);ctx.fillStyle='#0758dc';ctx.fillRect(0,0,W,150);
+  ctx.fillStyle='#fff';ctx.font='bold 46px Arial,"Noto Sans Thai",sans-serif';ctx.textAlign='center';ctx.fillText('JIN Cashbook',W/2,62);
+  ctx.font='bold 27px Arial,"Noto Sans Thai",sans-serif';ctx.fillText('รายงานรายรับ-รายจ่าย',W/2,105);
+  ctx.font='bold 22px Arial,"Noto Sans Thai",sans-serif';ctx.fillText(getPeriodLabel(),W/2,137);
+  ctx.textAlign='left';ctx.fillStyle='#182536';ctx.font='bold 25px Arial,"Noto Sans Thai",sans-serif';ctx.fillText(`รายงานวันที่ ${thaiDate(today())}`,M,205);
+  const cards=[['รายรับ',`฿${money(inc)}`,'#12b95b'],['รายจ่าย',`฿${money(out)}`,'#ef3b5d'],['คงเหลือ',`${net<0?'−':''}฿${money(Math.abs(net))}`,'#1769e0'],['จำนวนรายการ',String(list.length),'#7657db']];
+  cards.forEach((c,i)=>{const x=M+i*275;ctx.fillStyle=c[2];ctx.roundRect(x,235,250,105,18);ctx.fill();ctx.fillStyle='#fff';ctx.font='bold 20px Arial,"Noto Sans Thai",sans-serif';ctx.fillText(c[0],x+18,267);ctx.font='bold 28px Arial,"Noto Sans Thai",sans-serif';ctx.fillText(c[1],x+18,310);});
+  let y=390; const cols=[M,180,340,760,1010]; const heads=['วันที่','ประเภท','รายการรายละเอียด','หมายเหตุ','จำนวนเงิน'];
+  ctx.fillStyle='#eaf1f8';ctx.fillRect(M,y,W-2*M,52);ctx.fillStyle='#29425d';ctx.font='bold 18px Arial,"Noto Sans Thai",sans-serif';heads.forEach((h,i)=>ctx.fillText(h,cols[i]+8,y+33));y+=52;
+  const rowH=66; const usableBottom=H-90;
+  const rows=list.slice(pageIndex*20,(pageIndex+1)*20);
+  rows.forEach((x,ri)=>{ctx.strokeStyle='#cbd7e5';ctx.strokeRect(M,y,W-2*M,rowH);ctx.fillStyle=ri%2?'#fff':'#f8fbfe';ctx.fillRect(M,y,W-2*M,rowH);ctx.strokeStyle='#cbd7e5';[cols[1],cols[2],cols[3],cols[4]].forEach(xx=>ctx.beginPath(),ctx.moveTo(xx,y),ctx.lineTo(xx,y+rowH),ctx.stroke());ctx.fillStyle='#182536';ctx.font='16px Arial,"Noto Sans Thai",sans-serif';ctx.fillText(thaiDate(x.date),cols[0]+8,y+25);ctx.fillText(x.type==='income'?'รายรับ':'รายจ่าย',cols[1]+8,y+25);ctx.fillText(String(x.description||'').slice(0,32),cols[2]+8,y+25);ctx.fillText(String(x.note||'').slice(0,20),cols[3]+8,y+25);ctx.textAlign='right';ctx.fillStyle=x.type==='income'?'#0a9f36':'#e91d43';ctx.font='bold 17px Arial,"Noto Sans Thai",sans-serif';ctx.fillText(`${x.type==='income'?'+':'−'}฿${money(x.amount)}`,W-M-10,y+25);ctx.textAlign='left';y+=rowH;});
+  if(!rows.length){ctx.fillStyle='#7b8998';ctx.font='20px Arial,"Noto Sans Thai",sans-serif';ctx.textAlign='center';ctx.fillText('ไม่มีรายการในช่วงที่เลือก',W/2,y+45);ctx.textAlign='left';}
+  ctx.fillStyle='#8996a5';ctx.font='15px Arial,"Noto Sans Thai",sans-serif';ctx.textAlign='center';ctx.fillText(`JIN Cashbook Mobile · หน้า ${pageIndex+1}/${pageCount}`,W/2,H-35);ctx.textAlign='left';
+}
+async function makeReportPdf(){
+  const {list,inc,out,net}=reportData(); const pageSize=20; const pageCount=Math.max(1,Math.ceil(list.length/pageSize)); const pages=[];
+  for(let i=0;i<pageCount;i++){const c=document.createElement('canvas');drawReportPage(c,list,i,pageCount,inc,out,net);pages.push(c);}
+  return await canvasPagesToPdf(pages);
+}
+async function shareReport(){
+  try{
+    const file=new File([await makeReportPdf()],`JIN_Cashbook_${today()}.pdf`,{type:'application/pdf'});
+    if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){await navigator.share({title:'JIN Cashbook - รายงาน PDF',files:[file]});return;}
+    download(file,file.name);alert('สร้างไฟล์ PDF เรียบร้อยแล้ว สามารถนำไฟล์ไปส่ง LINE หรือเก็บไว้ในเครื่องได้');
+  }catch(e){if(e?.name==='AbortError')return;alert('สร้าง/แชร์ PDF ไม่สำเร็จ: '+(e?.message||e));}
+}
+async function saveReportPdf(){
+  try{
+    const file=new File([await makeReportPdf()],`JIN_Cashbook_${today()}.pdf`,{type:'application/pdf'});
+    if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){await navigator.share({title:'JIN Cashbook - บันทึก PDF',text:'เลือก LINE, Files หรือแอปที่ต้องการ เพื่อส่งหรือเก็บไฟล์ PDF',files:[file]});return;}
+    const a=document.createElement('a');a.href=URL.createObjectURL(file);a.download=file.name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},2000);
+    alert('บันทึกไฟล์ PDF แล้ว: '+file.name);
+  }catch(e){if(e?.name==='AbortError')return;alert('บันทึก PDF ไม่สำเร็จ: '+(e?.message||e));}
 }
 
 function init() {
