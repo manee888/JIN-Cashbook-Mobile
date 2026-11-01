@@ -1,3 +1,5 @@
-JIN Cashbook Mobile V2.4.1 – Fixed Offline + iOS No Auto-Zoom
-UI Master preserved
-Fix: form controls use 16px minimum to prevent Safari auto-zoom when tapping fields. Service Worker cache bumped to v24.1.
+V2.4.2 Report UI Fix 2
+- Keep V2.4.1 No Auto Zoom UI
+- Report full-screen with Back + Share
+- Save PDF opens a dedicated print tab with a visible Save PDF / Print button
+- Uses browser/system Save as PDF
