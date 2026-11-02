@@ -1,11 +1,12 @@
-const CACHE = "jin-cashbook-mobile-v242-pdf-export-fix13";
+const CACHE = "jin-cashbook-mobile-v242-pdf-export-fix14";
 const ASSETS = [
   "./",
   "./index.html",
   "./styles.css",
   "./app.js",
   "./manifest.json",
-  "./icon.svg"
+  "./icon.svg",
+  "./jin-logo.png"
 ];
 
 self.addEventListener("install", event => {

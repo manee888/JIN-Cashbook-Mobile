@@ -56,3 +56,133 @@ main{width:min(720px,100%);margin:auto;padding:8px 10px}.page{display:none}.page
 .report-view{position:fixed;inset:0;background:#eef5fd;z-index:100;overflow:auto}.report-toolbar{position:sticky;top:0;z-index:5;min-height:58px;background:linear-gradient(135deg,#0758dc,#087bf4);color:#fff;display:flex;align-items:center;gap:8px;padding:8px 10px;box-shadow:0 3px 12px rgba(0,50,140,.25)}.report-toolbar-title{font-size:13px;font-weight:950;flex:1;text-align:center}.report-toolbar-actions{display:flex;gap:5px}.report-tool{border:0;border-radius:10px;padding:8px 9px;font-size:11px;font-weight:900;color:#fff}.report-tool.back{background:rgba(255,255,255,.16)}.report-tool.share{background:#16b957}.report-tool.pdf{background:#ff8a00}.report-screen{width:min(900px,100%);margin:auto;padding:12px}.report-sheet{background:#fff;padding:20px;box-shadow:0 4px 18px rgba(20,60,110,.12);border-radius:14px}.report-heading{text-align:center}.report-heading h1{margin:0;color:#0758dc;font-size:25px}.report-heading h2{margin:2px 0;font-size:17px}.report-period{font-weight:900;color:#30485f;margin-top:6px}.report-generated{font-size:10px;color:#7a8999;margin-top:2px}.report-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:16px 0}.rs{border-radius:12px;padding:10px;color:#fff}.rs small{display:block;font-size:10px}.rs b{display:block;font-size:16px;margin-top:4px}.rs.income{background:#12b95b}.rs.expense{background:#ef3b5d}.rs.balance{background:#1769e0}.rs.count{background:#7657db}.report-table{width:100%;border-collapse:collapse;font-size:11px}.report-table th,.report-table td{border:1px solid #cbd7e5;padding:7px}.report-table th{background:#edf3fa;color:#29425d}.report-right{text-align:right;white-space:nowrap}.report-in{color:#0a9f36;font-weight:900}.report-out{color:#e91d43;font-weight:900}.report-empty{text-align:center;color:#7b8998;padding:20px}.report-footer{text-align:center;color:#8996a5;font-size:9px;margin-top:12px}.report-open{overflow:hidden}
 @media(max-width:600px){.report-toolbar-title{font-size:11px}.report-tool{padding:8px 7px}.report-tool span{font-size:10px}.report-screen{padding:7px}.report-sheet{padding:12px;border-radius:10px}.report-summary{grid-template-columns:1fr 1fr}.report-table{font-size:9px}.report-table th,.report-table td{padding:5px}.report-table th:nth-child(4),.report-table td:nth-child(4){display:none}}
 @media print{body>*{display:none!important}.report-view{display:block!important;position:static!important;overflow:visible!important;background:#fff!important}.report-toolbar{display:none!important}.report-screen{width:auto!important;padding:0!important}.report-sheet{box-shadow:none!important;border-radius:0!important;padding:0!important}.report-table{font-size:9pt!important}.report-table th,.report-table td{padding:5px!important}.report-table th:nth-child(4),.report-table td:nth-child(4){display:table-cell!important}@page{size:A4;margin:10mm}}
+
+/* =========================================================
+   FIX14 MODERN UI — visual layer only
+   Logic/data/PDF/share remain inherited from FIX13.
+   ========================================================= */
+:root{
+  --modern-blue:#086be9;
+  --modern-deep:#0648c9;
+  --modern-soft:#eef6ff;
+  --modern-ink:#103b70;
+}
+body{
+  background:linear-gradient(180deg,#eaf5ff 0%,#f8fbff 44%,#e9f3ff 100%);
+}
+.hero{
+  position:relative;
+  top:0;
+  background:
+    radial-gradient(circle at 12% 18%,rgba(255,255,255,.18),transparent 20%),
+    linear-gradient(145deg,#073ed4 0%,#0878ef 48%,#09a9ee 100%);
+  min-height:156px;
+  overflow:hidden;
+  box-shadow:0 10px 28px rgba(0,72,180,.22);
+}
+.hero:before,.hero:after{
+  content:"";position:absolute;pointer-events:none;border-radius:50%;
+  transform:rotate(-13deg);
+}
+.hero:before{
+  width:120%;height:110px;left:-10%;bottom:-56px;
+  background:rgba(255,255,255,.14);
+  border-top:2px solid rgba(255,255,255,.55);
+}
+.hero:after{
+  width:115%;height:78px;left:17%;bottom:-58px;
+  background:rgba(80,245,255,.28);
+  border-top:2px solid rgba(255,255,255,.5);
+}
+.hero-inner{
+  position:relative;z-index:2;max-width:760px;margin:auto;
+  padding:18px 16px 42px;align-items:center;
+}
+.brand{gap:10px;min-width:0;align-items:center}
+.brand-logo{
+  width:82px;height:82px;object-fit:contain;flex:0 0 auto;
+  filter:drop-shadow(0 0 9px rgba(121,247,255,.8));
+}
+.brand-copy{min-width:0}
+.brand-title{font-size:28px;letter-spacing:-.7px;white-space:nowrap;text-shadow:0 2px 7px rgba(0,30,100,.18)}
+.brand-title span{color:#ffd71a}
+.brand-sub{font-size:11px;font-weight:850;margin-top:5px;white-space:nowrap;color:#fff}
+.header-settings{
+  width:48px;height:48px;border-radius:50%;flex:0 0 auto;
+  background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.42);
+  color:#fff;font-size:28px;display:grid;place-items:center;
+  box-shadow:0 5px 16px rgba(0,37,120,.2);backdrop-filter:blur(9px)
+}
+main{max-width:760px;margin:-2px auto 0;padding:0 12px;position:relative;z-index:3}
+.range-summary{
+  margin:-1px 0 8px;background:rgba(255,255,255,.94);border:1px solid #c8def8;
+  border-radius:18px;padding:9px 10px;display:flex;align-items:center;justify-content:space-between;gap:8px;
+  box-shadow:0 7px 20px rgba(31,89,150,.12);backdrop-filter:blur(12px)
+}
+.range-summary-text{display:flex;align-items:center;gap:8px;min-width:0;color:#164b8b;font-size:11px;font-weight:850}
+.range-calendar{font-size:21px;color:#0870e9;line-height:1}
+.range-summary-text b{font-weight:950}
+#rangeChange{background:#eef5ff;color:#0a60d7;border:1px solid #b8d1f5;border-radius:999px;padding:8px 12px;font-size:10px;font-weight:950;white-space:nowrap}
+.period-pills{background:rgba(255,255,255,.72);border:1px solid #d4e4f6;border-radius:999px;padding:4px;gap:3px;margin-bottom:10px;box-shadow:0 4px 14px rgba(36,86,139,.08)}
+.period-pills button{padding:8px 3px;background:#e4edf9;color:#385a7c;font-size:11px}
+.period-pills button.active{background:linear-gradient(135deg,#117cf2,#0758dc);box-shadow:0 4px 12px rgba(5,83,210,.24)}
+.custom-mode-button{display:none!important}
+.custom-range{border-radius:18px;border:1px solid #c8def8;box-shadow:0 7px 20px rgba(31,89,150,.12)}
+.money-grid{gap:10px}
+.money{min-height:104px;border-radius:20px;padding:13px 13px 11px;box-shadow:0 9px 23px rgba(22,86,143,.17)}
+.money:after{content:"";position:absolute;right:-18px;bottom:-32px;width:150px;height:82px;border-radius:50%;border-top:2px solid rgba(255,255,255,.23);transform:rotate(-11deg)}
+.money-top{font-size:14px}.money-icon{width:38px;height:38px;border-radius:50%;font-size:22px}
+.money strong{font-size:25px;margin-left:45px;margin-top:6px}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.balance-card{margin:0;min-height:104px;border-radius:20px;padding:12px 13px;grid-template-columns:48px 1fr;box-shadow:0 9px 23px rgba(5,71,198,.19)}
+.balance-icon{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.92);font-size:24px}
+.balance-copy span{font-size:13px}.balance-copy strong{font-size:27px;color:#fff}
+.count-card{position:relative;overflow:hidden;display:grid;grid-template-columns:48px 1fr auto;align-items:center;gap:7px;min-height:104px;padding:12px 13px;border-radius:20px;color:#fff;background:linear-gradient(135deg,#8a20f0,#6c21db);box-shadow:0 9px 23px rgba(112,35,218,.2)}
+.count-icon{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.93);color:#7b24df;font-size:22px;font-weight:950}
+.count-copy span{display:block;font-size:13px;font-weight:850}.count-copy strong{display:block;font-size:30px;line-height:1.03;font-weight:950;margin-top:2px}.count-mark{font-size:25px;opacity:.4;align-self:end;padding-bottom:3px}
+.balance-unit{display:none}
+.quick-grid{display:none}
+.panel{border:1px solid #dce9f7;border-radius:20px;margin:10px 0;background:rgba(255,255,255,.92);box-shadow:0 8px 24px rgba(38,91,145,.11)}
+.chart-panel{padding:13px 13px 10px;overflow:visible}
+.modern-section-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 2px 5px}
+.modern-title{display:flex;align-items:center;gap:8px;color:#103f78}
+.modern-title .title-icon{font-size:31px;color:#0870e9;line-height:.7;font-weight:500}
+.modern-title h3{font-size:16px;margin:0;font-weight:950}
+.modern-select{background:#edf5ff;color:#0b61d8;border:0;border-radius:999px;padding:9px 12px;font-size:10px;font-weight:950;white-space:nowrap}
+.chart-legend{justify-content:center;gap:16px;padding:4px 0 0;font-size:10px}
+.monthly-chart{height:160px;padding:8px 8px 7px;gap:7px}
+.month-bar{width:22px;border-radius:7px 7px 0 0}
+.month-name{font-size:9px;font-weight:750}
+.recent-panel{padding:12px 10px 5px;overflow:hidden}
+.recent-panel #recentList{margin-top:3px}
+.recent-panel .item{margin:0 0 3px;border:1px solid #e5edf6;border-radius:16px;padding:10px 11px;background:rgba(255,255,255,.94)}
+.recent-panel .item:last-child{margin-bottom:0}
+.recent-panel .item-bullet{width:34px;height:34px}
+.recent-panel .item-desc{font-size:12px}.recent-panel .item-note,.recent-panel .item-date{font-size:9px}.recent-panel .amount{font-size:13px}
+.fab{right:max(16px,calc((100vw - 760px)/2 + 12px));bottom:79px;width:58px;height:58px;padding:0;display:grid;place-items:center;border-radius:50%;font-size:38px;line-height:1;background:linear-gradient(135deg,#10a9ff,#0864ec);box-shadow:0 8px 24px rgba(0,112,235,.38),0 0 0 4px rgba(96,210,255,.15);border:1px solid rgba(255,255,255,.65)}
+.fab span{display:none}
+.bottom-nav{height:78px;max-width:760px;left:50%;right:auto;width:100%;transform:translateX(-50%);border:1px solid rgba(210,226,243,.85);border-radius:24px 24px 0 0;background:rgba(255,255,255,.88);box-shadow:0 -7px 25px rgba(38,83,132,.12);backdrop-filter:blur(16px);padding-bottom:env(safe-area-inset-bottom)}
+.nav{color:#5c7087}.nav i{font-size:27px}.nav span{font-size:10px;font-weight:900}.nav.active{color:#0966e7}.nav.active:after{content:"";position:absolute;bottom:2px;width:68px;height:4px;border-radius:999px;background:#096be9}
+.page-title{padding:13px 4px}.page-title h2{font-size:22px;color:#123f72}
+.report-grid>div{border-radius:18px}
+@media(max-width:600px){
+  .hero{min-height:138px}.hero-inner{padding:12px 11px 37px}.brand-logo{width:70px;height:70px}.brand-title{font-size:22px}.brand-sub{font-size:9px}.header-settings{width:42px;height:42px;font-size:24px}
+  main{padding:0 10px}.range-summary{padding:8px 8px}.range-summary-text{font-size:10px}.range-calendar{font-size:19px}.period-pills button{font-size:10px;padding:8px 2px}
+  .money{min-height:92px;padding:10px}.money-top{font-size:12px}.money-icon{width:34px;height:34px;font-size:19px}.money strong{font-size:21px;margin-left:40px}
+  .stats-grid{gap:8px}.balance-card,.count-card{min-height:92px;padding:10px}.balance-icon,.count-icon{width:35px;height:35px;font-size:20px}.balance-copy span,.count-copy span{font-size:11px}.balance-copy strong,.count-copy strong{font-size:23px}.count-mark{font-size:20px}
+  .modern-title .title-icon{font-size:27px}.modern-title h3{font-size:14px}.modern-select{font-size:9px;padding:8px 10px}.chart-panel{padding:11px 9px 8px}.monthly-chart{height:145px;padding-left:3px;padding-right:3px}.month-bar{width:17px}
+  .recent-panel{padding:10px 7px 4px}.recent-panel .item{padding:8px 8px}.recent-panel .item-bullet{width:31px;height:31px}.recent-panel .item-desc{font-size:11px}.recent-panel .amount{font-size:12px}
+  .bottom-nav{height:70px;border-radius:21px 21px 0 0}.nav i{font-size:24px}.nav span{font-size:9px}.nav.active:after{width:58px}
+  .fab{width:54px;height:54px;font-size:34px;bottom:74px}
+}
+@media(max-width:360px){.brand-logo{width:62px;height:62px}.brand-title{font-size:20px}.brand-sub{font-size:8px}.money strong{font-size:19px}.balance-copy strong,.count-copy strong{font-size:21px}.range-summary-text{font-size:9px}}
+
+
+/* Custom user logo controls and ownership footer */
+.brand-logo { cursor: pointer; }
+.brand-logo:focus-visible { outline: 3px solid rgba(255,255,255,.9); outline-offset: 4px; }
+.logo-setting-actions { display:flex; gap:8px; flex-wrap:wrap; }
+.logo-setting-actions button { min-width:88px; }
+footer { line-height:1.75; padding:18px 18px calc(24px + env(safe-area-inset-bottom)); text-align:center; }
+footer strong { color:#31577f; font-weight:800; }
+footer span { color:#6f8299; }

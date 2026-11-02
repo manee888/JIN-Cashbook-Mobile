@@ -16,10 +16,10 @@
 <header class="hero">
   <div class="hero-inner">
     <div class="brand">
-      <div class="wallet-art">👛</div>
-      <div>
+      <img class="brand-logo" id="brandLogo" src="jin-logo.png" alt="JIN COMPUTER" title="แตะเพื่อเปลี่ยนโลโก้">
+      <div class="brand-copy">
         <div class="brand-title"><span>JIN</span> Cashbook</div>
-        <div class="brand-sub">บันทึกรายรับ-รายจ่าย อย่างง่าย ใช้ได้ทุกที่</div>
+        <div class="brand-sub">จัดการการเงินได้ทุกที่...ง่ายขึ้นด้วยมือถือในมือคุณ</div>
       </div>
     </div>
     <button class="header-settings" id="headerSettings" aria-label="ตั้งค่า">⚙</button>
@@ -28,12 +28,16 @@
 
 <main>
 <section id="home" class="page active">
+  <div class="range-summary">
+    <div class="range-summary-text"><span class="range-calendar">▣</span><span>ช่วงวันที่ : <b id="rangeLabel">วันนี้</b></span></div>
+    <button id="rangeChange" type="button">เปลี่ยนช่วง⌄</button>
+  </div>
   <div class="period-pills">
     <button data-mode="day" class="active">วันนี้</button>
     <button data-mode="month">เดือนนี้</button>
     <button data-mode="year">ปีนี้</button>
     <button data-mode="all">ทั้งหมด</button>
-    <button data-mode="custom">กำหนดช่วง</button>
+    <button data-mode="custom" class="custom-mode-button">กำหนดช่วง</button>
   </div>
 
   <div id="customRange" class="custom-range hidden">
@@ -61,10 +65,16 @@
     </div>
   </div>
 
-  <div class="balance-card">
-    <div class="balance-icon">📊</div>
-    <div class="balance-copy"><span>คงเหลือวันนี้</span><strong id="netTotal">฿0.00</strong></div>
-    <div class="balance-unit">บาท</div>
+  <div class="stats-grid">
+    <div class="balance-card">
+      <div class="balance-icon">🪙</div>
+      <div class="balance-copy"><span>คงเหลือ</span><strong id="netTotal">฿0.00</strong></div>
+    </div>
+    <div class="count-card">
+      <div class="count-icon">▤</div>
+      <div class="count-copy"><span>จำนวนรายการ</span><strong id="homeCount">0</strong></div>
+      <div class="count-mark">▰</div>
+    </div>
   </div>
 
   <div class="quick-grid">
@@ -79,13 +89,13 @@
   </div>
 
   <section class="panel chart-panel">
-    <div class="section-title blue-title"><span class="title-icon">▥</span><h3>สรุปรายรับรายจ่ายรายเดือน</h3><button id="seeAllChart" class="see-link">ดูทั้งหมด ›</button></div>
+    <div class="modern-section-head"><div class="modern-title"><span class="title-icon">⌁</span><h3>สรุปภาพรวม</h3></div><button id="chartPeriod" class="modern-select" type="button">เดือนนี้⌄</button></div>
     <div class="chart-legend"><span><i class="dot green"></i>รายรับ</span><span><i class="dot red"></i>รายจ่าย</span></div>
     <div id="monthlyChart" class="monthly-chart"></div>
   </section>
 
   <section class="panel recent-panel">
-    <div class="section-title blue-title"><span class="title-icon star">★</span><h3>รายการล่าสุด</h3><button class="see-link" id="seeAll">ดูทั้งหมด ›</button></div>
+    <div class="modern-section-head"><div class="modern-title"><span class="title-icon">◔</span><h3>รายการล่าสุด</h3></div><button class="modern-select" id="seeAll" type="button">ดูทั้งหมด ›</button></div>
     <div id="recentList"></div>
   </section>
 </section>
@@ -104,6 +114,8 @@
 <section id="settings" class="page">
   <div class="page-title"><span>เครื่องมือ</span><h2>ตั้งค่า & สำรองข้อมูล</h2><p>ข้อมูลหลักอยู่ในมือถือ ไม่จำเป็นต้องใช้ Cloud</p></div>
   <div class="panel">
+    <div class="setting-row"><div><b>โลโก้โปรแกรม</b><small>เลือกรูปจากโทรศัพท์หรือคอมพิวเตอร์ของคุณ</small></div><div class="logo-setting-actions"><button class="secondary" id="changeLogoBtn">เปลี่ยนรูป</button><button class="secondary" id="resetLogoBtn">คืนค่า</button></div></div>
+    <input id="logoFile" type="file" accept="image/*" class="hidden">
     <div class="setting-row"><div><b>สำรองข้อมูล JSON</b><small>ไฟล์สำหรับย้ายไปเครื่องอื่น</small></div><button class="primary" id="backupBtn">สำรอง</button></div>
     <div class="setting-row"><div><b>กู้คืนข้อมูล JSON</b><small>แทนที่ข้อมูลในเครื่องด้วยไฟล์สำรอง</small></div><button class="secondary" id="restoreBtn">กู้คืน</button></div>
     <div class="setting-row"><div><b>ส่งออก CSV</b><small>เปิดต่อใน Excel / Google Sheets</small></div><button class="secondary" id="csvBtn">ส่งออก</button></div>
@@ -140,7 +152,7 @@
     <div class="form-actions"><button id="cancelBtn" class="secondary">ยกเลิก</button><button id="saveBtn" class="primary">บันทึกรายการ</button></div>
   </div>
 </div>
-<footer>JIN Cashbook Mobile · รูปแบบข้อมูล JIN_CASHBOOK / version 1</footer>
+<footer>JIN Cashbook Mobile · รูปแบบข้อมูล JIN_CASHBOOK / version 1<br><strong>© 2026 J.I.N.Computer. All rights reserved.</strong><br><span>JIN Cashbook เป็นทรัพย์สินทางปัญญาของ J.I.N.Computer</span></footer>
 <script src="app.js"></script>
 </body>
 </html>

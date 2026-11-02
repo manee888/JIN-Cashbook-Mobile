@@ -122,6 +122,27 @@ function getPeriodLabel() {
   return "ทั้งหมด";
 }
 
+
+function getModernRangeLabel() {
+  if (currentMode === "day") return `${thaiDate(today())}`;
+  if (currentMode === "month") {
+    const t = today();
+    const [y,m] = t.split("-").map(Number);
+    const last = new Date(y, m, 0).getDate();
+    return `${thaiDate(`${y}-${String(m).padStart(2,"0")}-01`)} - ${thaiDate(`${y}-${String(m).padStart(2,"0")}-${String(last).padStart(2,"0")}`)}`;
+  }
+  if (currentMode === "year") {
+    const y = Number(today().slice(0,4));
+    return `1/1/${y+543} - 31/12/${y+543}`;
+  }
+  if (currentMode === "custom") {
+    if (customStart && customEnd) return `${thaiDate(customStart)} - ${thaiDate(customEnd)}`;
+    if (customStart) return `ตั้งแต่ ${thaiDate(customStart)}`;
+    return "กำหนดช่วงวันที่";
+  }
+  return "ทั้งหมด";
+}
+
 function periodEntries(list = entries) {
   const t = today();
   if (currentMode === "day") return list.filter(e => e.date === t);
@@ -161,6 +182,8 @@ function render() {
   $("reportExpense").textContent = `฿${money(out)}`;
   $("reportNet").textContent = `${net < 0 ? "−" : ""}฿${money(Math.abs(net))}`;
   $("reportCount").textContent = list.length;
+  if ($("homeCount")) $("homeCount").textContent = list.length;
+  if ($("rangeLabel")) $("rangeLabel").textContent = getModernRangeLabel();
   $("reportText").innerHTML = `${getPeriodLabel()} · <b>${list.length}</b> รายการ · รายรับ <b>฿${money(inc)}</b> · รายจ่าย <b>฿${money(out)}</b> · คงเหลือ <b>${net < 0 ? "−" : ""}฿${money(Math.abs(net))}</b>`;
 
   renderMonthlyChart();
@@ -599,6 +622,60 @@ async function saveReportPdf(){
   }
 }
 
+
+const LOGO_KEY = "JIN_CASHBOOK_CUSTOM_LOGO_V1";
+function applySavedLogo() {
+  const img = $("brandLogo");
+  if (!img) return;
+  const saved = localStorage.getItem(LOGO_KEY);
+  img.src = saved || "jin-logo.png";
+}
+function openLogoPicker() {
+  const input = $("logoFile");
+  if (input) input.click();
+}
+function handleLogoFile() {
+  const input = $("logoFile");
+  const file = input && input.files && input.files[0];
+  if (!file) return;
+  if (!file.type.startsWith("image/")) {
+    alert("กรุณาเลือกไฟล์รูปภาพ");
+    input.value = "";
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = () => {
+    const source = new Image();
+    source.onload = () => {
+      const max = 512;
+      const scale = Math.min(1, max / Math.max(source.width, source.height));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, Math.round(source.width * scale));
+      canvas.height = Math.max(1, Math.round(source.height * scale));
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(source, 0, 0, canvas.width, canvas.height);
+      const data = canvas.toDataURL("image/jpeg", 0.86);
+      try {
+        localStorage.setItem(LOGO_KEY, data);
+        applySavedLogo();
+        alert("เปลี่ยนโลโก้เรียบร้อยแล้ว");
+      } catch (_) {
+        alert("บันทึกรูปไม่สำเร็จ กรุณาเลือกรูปที่มีขนาดเล็กลง");
+      }
+      input.value = "";
+    };
+    source.onerror = () => alert("ไม่สามารถเปิดรูปภาพนี้ได้");
+    source.src = reader.result;
+  };
+  reader.onerror = () => alert("อ่านไฟล์รูปภาพไม่สำเร็จ");
+  reader.readAsDataURL(file);
+}
+function resetLogo() {
+  if (!confirm("ต้องการคืนโลโก้ JIN COMPUTER เดิมหรือไม่?")) return;
+  localStorage.removeItem(LOGO_KEY);
+  applySavedLogo();
+}
+
 function init() {
   // All event handlers are wired only to elements that really exist in index.html.
   $("incomeBtn").onclick = () => setKind("income");
@@ -614,12 +691,22 @@ function init() {
   $("restoreQuick").onclick = () => $("restoreFile").click();
   $("csvQuick").onclick = csv;
   $("printQuick").onclick = showReport;
-  $("seeAllChart").onclick = () => go("summary");
+  if ($("seeAllChart")) $("seeAllChart").onclick = () => go("summary");
+  if ($("chartPeriod")) $("chartPeriod").onclick = () => go("summary");
   $("seeAll").onclick = () => go("history");
   $("seeAllQuick").onclick = () => go("history");
   $("headerSettings").onclick = () => go("settings");
+  if ($("brandLogo")) $("brandLogo").onclick = openLogoPicker;
+  if ($("changeLogoBtn")) $("changeLogoBtn").onclick = openLogoPicker;
+  if ($("logoFile")) $("logoFile").onchange = handleLogoFile;
+  if ($("resetLogoBtn")) $("resetLogoBtn").onclick = resetLogo;
+  applySavedLogo();
   document.querySelectorAll(".nav").forEach(n => n.onclick = () => go(n.dataset.page));
   document.querySelectorAll(".period-pills button").forEach(b => b.onclick = () => setMode(b.dataset.mode));
+  if ($("rangeChange")) $("rangeChange").onclick = () => {
+    $("customRange").classList.toggle("hidden");
+    $("customRange").scrollIntoView({behavior:"smooth", block:"nearest"});
+  };
   $("rangeApply").onclick = () => {
     let a=$("rangeStart").value, b=$("rangeEnd").value;
     if(!a && !b) return alert("กรุณาเลือกวันที่เริ่มต้นและวันที่สิ้นสุด");
@@ -657,7 +744,7 @@ function init() {
   }).catch(() => render());
 
   if ("serviceWorker" in navigator && window.isSecureContext) {
-    navigator.serviceWorker.register("sw.js?v=fix13").catch(() => {});
+    navigator.serviceWorker.register("sw.js?v=fix14").catch(() => {});
   }
 }
 

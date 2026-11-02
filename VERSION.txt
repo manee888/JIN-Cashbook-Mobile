@@ -1,4 +1,4 @@
-JIN Cashbook Mobile V2.4.2 – PDF Export FIX 13
-Base: FIX12
-Enhancements: custom date-range filtering and quantity × unit-price calculation.
-UI MASTER preserved. Existing data remains compatible.
+JIN Cashbook Mobile FIX14
+Base: V2_4_2_PDF_EXPORT_FIX13
+UI: Modern UI Refresh
+Core/data/PDF/share logic: preserved from FIX13
